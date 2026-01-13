@@ -29,7 +29,7 @@ public class CommandLineInterface {
             System.out.print("db> ");
             String inputString = scanner.nextLine();
             if (inputString.equalsIgnoreCase("exit")) {
-                StorageManager.save(db, "storage/default_db.json");
+                StorageManager.save(db, "src/main/java/storage/default_db.json");
                 break;
             }
             processInput(inputString);
