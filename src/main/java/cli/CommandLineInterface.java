@@ -12,12 +12,10 @@ import storage.StorageManager;
 import java.util.Scanner;
 
 public class CommandLineInterface {
-    private SqlParser parser = new SqlParser();
+    private final SqlParser parser = new SqlParser();
     private QueryExecutor executor;
-    private StorageManager storageManager = new StorageManager();
-    private Scanner scanner = new Scanner(System.in);
-
-    private Database db;
+    private final StorageManager storageManager = new StorageManager();
+    private final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         CommandLineInterface cli = new CommandLineInterface();
@@ -25,6 +23,7 @@ public class CommandLineInterface {
     }
 
     private void run() {
+        Database db;
         try {
             db = storageManager.load("src/main/java/storage/default_db.json");
         } catch (MemoryException e) {
@@ -39,7 +38,7 @@ public class CommandLineInterface {
             String inputString = scanner.nextLine();
             if (inputString.equalsIgnoreCase("exit")) {
                 try {
-                    StorageManager.save(db, "src/main/java/storage/default_db.json");
+                    storageManager.save(db, "src/main/java/storage/default_db.json");
                 } catch (MemoryException e) {
                     System.out.println("Error saving database: " + e.getMessage());
                 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SqlParser {
-    private Tokenizer tokenizer = new Tokenizer();
+    private final Tokenizer tokenizer = new Tokenizer();
 
     public SqlParser() {
     }
@@ -58,7 +58,7 @@ public class SqlParser {
     private SqlCommand parseInsert(List<String> queryTokens) throws SqlSyntaxException {
         queryTokens.removeFirst();
 
-        if (!queryTokens.get(0).equalsIgnoreCase("INTO")) {
+        if (!queryTokens.getFirst().equalsIgnoreCase("INTO")) {
             throw new SqlSyntaxException("Expected INTO");
         }
         queryTokens.removeFirst();
