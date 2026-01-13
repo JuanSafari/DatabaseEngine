@@ -10,8 +10,8 @@ public class Database {
         return tables;
     }
 
-    public void createTable(String name) {
-        tables.put(name, new Table(name));
+    public void addTable(Table table) {
+        tables.put(table.getName(), table);
     }
 
     public Table getTable(String name) {

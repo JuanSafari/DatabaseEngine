@@ -24,6 +24,8 @@ public class SqlParser {
             return parseUpdate(queryTokens);
         } else if (queryTokens.get(0).equalsIgnoreCase("DELETE")) {
             return parseDelete(queryTokens);
+        } else if (queryTokens.get(0).equalsIgnoreCase("CREATE")) {
+            return parseCreate(queryTokens);
         }
         return null;
     }
@@ -139,5 +141,33 @@ public class SqlParser {
         String tableName = queryTokens.remove(0);
 
         return new commands.DeleteCommand(tableName);
+    }
+
+    private SqlCommand parseCreate(List<String> queryTokens) throws SqlSyntaxException {
+        queryTokens.remove(0);
+
+        if (!queryTokens.get(0).equalsIgnoreCase("TABLE")) {
+            throw new SqlSyntaxException("Expected TABLE");
+        }
+        queryTokens.remove(0);
+
+        String tableName = queryTokens.remove(0);
+
+        if (!queryTokens.get(0).equals("(")) {
+            throw new SqlSyntaxException("Expected '(' after table name");
+        }
+        queryTokens.remove(0);
+
+        List<String> columns = new ArrayList<>();
+        while (!queryTokens.get(0).equals(")")) {
+            if (queryTokens.get(0).equals(",")) {
+                queryTokens.remove(0);
+                continue;
+            }
+            columns.add(queryTokens.remove(0));
+        }
+        queryTokens.remove(0);
+
+        return new commands.CreateCommand(tableName, columns);
     }
 }

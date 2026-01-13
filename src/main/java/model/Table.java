@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -16,6 +17,13 @@ public class Table {
 
     public Table(String name) {
         this.name = name;
+        this.rows = new ArrayList<>();
+    }
+
+    public Table(String name, List<String> columns) {
+        this.name = name;
+        this.columns = columns;
+        this.rows = new ArrayList<>();
     }
 
     public void addRow(String[] row) {

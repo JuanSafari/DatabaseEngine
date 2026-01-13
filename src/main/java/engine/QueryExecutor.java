@@ -110,7 +110,15 @@ public class QueryExecutor {
         table.getRows().clear();
     }
 
-    public void executeCreate(CreateCommand command) {
-        // Execute create
+    public void executeCreate(CreateCommand command) throws DatabaseException {
+        String tableName = command.getTableName();
+
+        if (database.getTable(tableName) != null) {
+            throw new DatabaseException("Table already exists: " + tableName);
+        }
+
+        Table newTable = new Table(tableName, new ArrayList<>(command.getColumns()));
+
+        database.addTable(newTable);
     }
 }
