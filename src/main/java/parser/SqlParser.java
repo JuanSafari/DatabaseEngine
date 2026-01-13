@@ -1,7 +1,9 @@
 package parser;
 
 import commands.InsertCommand;
+import commands.SelectCommand;
 import commands.SqlCommand;
+import commands.WhereClause;
 import exception.SqlSyntaxException;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class SqlParser {
         return null;
     }
 
-    private SqlCommand parseSelect(List<String> queryTokens) {
+    private SqlCommand parseSelect(List<String> queryTokens) throws SqlSyntaxException {
         queryTokens.remove(0);
         List<String> columns = new ArrayList<>();
         while (!queryTokens.get(0).equalsIgnoreCase("FROM")) {
@@ -43,7 +45,13 @@ public class SqlParser {
         }
         queryTokens.remove(0);
         String tableName = queryTokens.remove(0);
-        return new commands.SelectCommand(tableName, columns);
+
+        if (!queryTokens.isEmpty() && queryTokens.get(0).equalsIgnoreCase("WHERE")) {
+            WhereClause whereClause = parseWhereClause(queryTokens);
+            return new SelectCommand(tableName, columns, whereClause);
+        }
+
+        return new SelectCommand(tableName, columns);
     }
 
     private SqlCommand parseInsert(List<String> queryTokens) throws SqlSyntaxException {
@@ -170,5 +178,15 @@ public class SqlParser {
         queryTokens.remove(0);
 
         return new commands.CreateCommand(tableName, columns);
+    }
+
+    private WhereClause parseWhereClause(List<String> queryTokens) throws SqlSyntaxException {
+        queryTokens.remove(0);
+        String whereColumn = queryTokens.remove(0);
+        if (!queryTokens.remove(0).equalsIgnoreCase("=")) {
+            throw new SqlSyntaxException("Expected = in WHERE clause");
+        }
+        String whereValue = queryTokens.remove(0);
+        return new WhereClause(whereColumn, whereValue);
     }
 }

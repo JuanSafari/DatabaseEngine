@@ -45,6 +45,18 @@ public class QueryExecutor {
         System.out.println();
 
         for (String[] row : tableRows) {
+            if (command.getWhereClause() != null) {
+                int whereIndex = tableColumns.indexOf(command.getWhereClause().getWhereColumn());
+                if (whereIndex == -1) {
+                    throw new DatabaseException("Column not found: " + command.getWhereClause().getWhereColumn());
+                }
+
+                String whereValue = command.getWhereClause().getWhereValue();
+                if (!row[whereIndex].equals(whereValue)) {
+                    continue;
+                }
+            }
+
             for (int index : selectedIndexes) {
                 System.out.print(row[index] + " | ");
             }
