@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class SqlParser {
     private Tokenizer tokenizer = new Tokenizer();
+
     public SqlParser() {
     }
 
@@ -33,7 +34,7 @@ public class SqlParser {
     private SqlCommand parseSelect(List<String> queryTokens) {
         queryTokens.remove(0);
         List<String> columns = new ArrayList<>();
-        while(!queryTokens.get(0).equalsIgnoreCase("FROM")) {
+        while (!queryTokens.get(0).equalsIgnoreCase("FROM")) {
             if (queryTokens.get(0).equals(",")) {
                 queryTokens.remove(0);
                 continue;
