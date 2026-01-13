@@ -19,34 +19,35 @@ public class SqlParser {
 
     public SqlCommand getCommand(String query) throws SqlSyntaxException {
         List<String> queryTokens = new ArrayList<>(tokenizer.tokenize(query));
-        if (queryTokens.get(0).equalsIgnoreCase("SELECT")) {
+        if (queryTokens.getFirst().equalsIgnoreCase("SELECT")) {
             return parseSelect(queryTokens);
-        } else if (queryTokens.get(0).equalsIgnoreCase("INSERT")) {
+        } else if (queryTokens.getFirst().equalsIgnoreCase("INSERT")) {
             return parseInsert(queryTokens);
-        } else if (queryTokens.get(0).equalsIgnoreCase("UPDATE")) {
+        } else if (queryTokens.getFirst().equalsIgnoreCase("UPDATE")) {
             return parseUpdate(queryTokens);
-        } else if (queryTokens.get(0).equalsIgnoreCase("DELETE")) {
+        } else if (queryTokens.getFirst().equalsIgnoreCase("DELETE")) {
             return parseDelete(queryTokens);
-        } else if (queryTokens.get(0).equalsIgnoreCase("CREATE")) {
+        } else if (queryTokens.getFirst().equalsIgnoreCase("CREATE")) {
             return parseCreate(queryTokens);
         }
         return null;
     }
 
     private SqlCommand parseSelect(List<String> queryTokens) throws SqlSyntaxException {
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
         List<String> columns = new ArrayList<>();
-        while (!queryTokens.get(0).equalsIgnoreCase("FROM")) {
-            if (queryTokens.get(0).equals(",")) {
-                queryTokens.remove(0);
+
+        while (!queryTokens.getFirst().equalsIgnoreCase("FROM")) {
+            if (queryTokens.getFirst().equals(",")) {
+                queryTokens.removeFirst();
                 continue;
             }
-            columns.add(queryTokens.remove(0));
+            columns.add(queryTokens.removeFirst());
         }
-        queryTokens.remove(0);
-        String tableName = queryTokens.remove(0);
+        queryTokens.removeFirst();
+        String tableName = queryTokens.removeFirst();
 
-        if (!queryTokens.isEmpty() && queryTokens.get(0).equalsIgnoreCase("WHERE")) {
+        if (!queryTokens.isEmpty() && queryTokens.getFirst().equalsIgnoreCase("WHERE")) {
             WhereClause whereClause = parseWhereClause(queryTokens);
             return new SelectCommand(tableName, columns, whereClause);
         }
@@ -55,48 +56,48 @@ public class SqlParser {
     }
 
     private SqlCommand parseInsert(List<String> queryTokens) throws SqlSyntaxException {
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
         if (!queryTokens.get(0).equalsIgnoreCase("INTO")) {
             throw new SqlSyntaxException("Expected INTO");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        String tableName = queryTokens.remove(0);
+        String tableName = queryTokens.removeFirst();
 
         List<String> columns = new ArrayList<>();
-        if (queryTokens.get(0).equals("(")) {
-            queryTokens.remove(0);
+        if (queryTokens.getFirst().equals("(")) {
+            queryTokens.removeFirst();
 
-            while (!queryTokens.get(0).equals(")")) {
-                if (queryTokens.get(0).equals(",")) {
-                    queryTokens.remove(0);
+            while (!queryTokens.getFirst().equals(")")) {
+                if (queryTokens.getFirst().equals(",")) {
+                    queryTokens.removeFirst();
                     continue;
                 }
-                columns.add(queryTokens.remove(0));
+                columns.add(queryTokens.removeFirst());
             }
-            queryTokens.remove(0);
+            queryTokens.removeFirst();
         }
 
-        if (!queryTokens.get(0).equalsIgnoreCase("VALUES")) {
+        if (!queryTokens.getFirst().equalsIgnoreCase("VALUES")) {
             throw new SqlSyntaxException("Expected VALUES");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
         List<String> values = new ArrayList<>();
-        if (!queryTokens.get(0).equals("(")) {
+        if (!queryTokens.getFirst().equals("(")) {
             throw new SqlSyntaxException("Expected ( after VALUES");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        while (!queryTokens.get(0).equals(")")) {
-            if (queryTokens.get(0).equals(",")) {
-                queryTokens.remove(0);
+        while (!queryTokens.getFirst().equals(")")) {
+            if (queryTokens.getFirst().equals(",")) {
+                queryTokens.removeFirst();
                 continue;
             }
-            values.add(queryTokens.remove(0));
+            values.add(queryTokens.removeFirst());
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
         Map<String, String> valuesMap = new HashMap<>();
         for (String value : values) {
@@ -107,30 +108,30 @@ public class SqlParser {
     }
 
     private SqlCommand parseUpdate(List<String> queryTokens) throws SqlSyntaxException {
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        String tableName = queryTokens.remove(0);
+        String tableName = queryTokens.removeFirst();
 
-        if (!queryTokens.get(0).equalsIgnoreCase("SET")) {
+        if (!queryTokens.getFirst().equalsIgnoreCase("SET")) {
             throw new SqlSyntaxException("Expected SET");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
         Map<String, String> newValues = new HashMap<>();
 
         while (!queryTokens.isEmpty()) {
-            String column = queryTokens.remove(0);
+            String column = queryTokens.removeFirst();
 
-            if (!queryTokens.get(0).equals("=")) {
+            if (!queryTokens.getFirst().equals("=")) {
                 throw new SqlSyntaxException("Expected = after column name");
             }
-            queryTokens.remove(0);
+            queryTokens.removeFirst();
 
-            String value = queryTokens.remove(0);
+            String value = queryTokens.removeFirst();
             newValues.put(column, value);
 
-            if (!queryTokens.isEmpty() && queryTokens.get(0).equals(",")) {
-                queryTokens.remove(0);
+            if (!queryTokens.isEmpty() && queryTokens.getFirst().equals(",")) {
+                queryTokens.removeFirst();
             } else {
                 break;
             }
@@ -140,53 +141,53 @@ public class SqlParser {
     }
 
     private SqlCommand parseDelete(List<String> queryTokens) throws SqlSyntaxException {
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        if (!queryTokens.get(0).equalsIgnoreCase("FROM")) {
+        if (!queryTokens.getFirst().equalsIgnoreCase("FROM")) {
             throw new SqlSyntaxException("Expected FROM");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        String tableName = queryTokens.remove(0);
+        String tableName = queryTokens.removeFirst();
 
         return new commands.DeleteCommand(tableName);
     }
 
     private SqlCommand parseCreate(List<String> queryTokens) throws SqlSyntaxException {
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        if (!queryTokens.get(0).equalsIgnoreCase("TABLE")) {
+        if (!queryTokens.getFirst().equalsIgnoreCase("TABLE")) {
             throw new SqlSyntaxException("Expected TABLE");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
-        String tableName = queryTokens.remove(0);
+        String tableName = queryTokens.removeFirst();
 
-        if (!queryTokens.get(0).equals("(")) {
+        if (!queryTokens.getFirst().equals("(")) {
             throw new SqlSyntaxException("Expected '(' after table name");
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
         List<String> columns = new ArrayList<>();
-        while (!queryTokens.get(0).equals(")")) {
-            if (queryTokens.get(0).equals(",")) {
-                queryTokens.remove(0);
+        while (!queryTokens.getFirst().equals(")")) {
+            if (queryTokens.getFirst().equals(",")) {
+                queryTokens.removeFirst();
                 continue;
             }
-            columns.add(queryTokens.remove(0));
+            columns.add(queryTokens.removeFirst());
         }
-        queryTokens.remove(0);
+        queryTokens.removeFirst();
 
         return new commands.CreateCommand(tableName, columns);
     }
 
     private WhereClause parseWhereClause(List<String> queryTokens) throws SqlSyntaxException {
-        queryTokens.remove(0);
-        String whereColumn = queryTokens.remove(0);
-        if (!queryTokens.remove(0).equalsIgnoreCase("=")) {
+        queryTokens.removeFirst();
+        String whereColumn = queryTokens.removeFirst();
+        if (!queryTokens.removeFirst().equalsIgnoreCase("=")) {
             throw new SqlSyntaxException("Expected = in WHERE clause");
         }
-        String whereValue = queryTokens.remove(0);
+        String whereValue = queryTokens.removeFirst();
         return new WhereClause(whereColumn, whereValue);
     }
 }
