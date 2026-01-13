@@ -1,19 +1,19 @@
 package commands;
 
+import engine.QueryExecutor;
+
 import java.util.List;
 
-import engine.QueryExecutor;
 import exception.DatabaseException;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-public class SelectCommand implements SqlCommand {
+public class CreateCommand implements SqlCommand {
     private final String tableName;
     private final List<String> columns;
 
+    @Override
     public void execute(QueryExecutor executor) throws DatabaseException {
-        executor.executeSelect(this);
+        executor.executeCreate(this);
     }
 }

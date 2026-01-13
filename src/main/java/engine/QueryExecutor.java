@@ -1,9 +1,7 @@
 package engine;
 
-import commands.DeleteCommand;
-import commands.InsertCommand;
-import commands.SelectCommand;
-import commands.UpdateCommand;
+import commands.*;
+import exception.DatabaseException;
 import lombok.Data;
 import model.Database;
 import model.Table;
@@ -17,10 +15,10 @@ import java.util.Map;
 public class QueryExecutor {
     private final Database database;
 
-    public void executeSelect(SelectCommand command) {
+    public void executeSelect(SelectCommand command) throws DatabaseException {
         Table table = database.getTable(command.getTableName());
         if (table == null) {
-            throw new RuntimeException("Table not found: " + command.getTableName());
+            throw new DatabaseException("Table not found: " + command.getTableName());
         }
 
         List<String> tableColumns = table.getColumns();
@@ -35,7 +33,7 @@ public class QueryExecutor {
             for (String col : command.getColumns()) {
                 int index = tableColumns.indexOf(col);
                 if (index == -1) {
-                    throw new RuntimeException("Column not found: " + col);
+                    throw new DatabaseException("Column not found: " + col);
                 }
                 selectedIndexes.add(index);
             }
@@ -54,10 +52,10 @@ public class QueryExecutor {
         }
     }
 
-    public void executeInsert(InsertCommand command) {
+    public void executeInsert(InsertCommand command) throws DatabaseException {
         Table table = database.getTable(command.getTableName());
         if (table == null) {
-            throw new RuntimeException("Table not found: " + command.getTableName());
+            throw new DatabaseException("Table not found: " + command.getTableName());
         }
 
         List<String> tableColumns = table.getColumns();
@@ -70,7 +68,7 @@ public class QueryExecutor {
 
             int index = tableColumns.indexOf(columnName);
             if (index == -1) {
-                throw new RuntimeException("Column not found: " + columnName);
+                throw new DatabaseException("Column not found: " + columnName);
             }
 
             newRow[index] = value;
@@ -79,10 +77,10 @@ public class QueryExecutor {
         table.addRow(newRow);
     }
 
-    public void executeUpdate(UpdateCommand command) {
+    public void executeUpdate(UpdateCommand command) throws DatabaseException {
         Table table = database.getTable(command.getTableName());
         if (table == null) {
-            throw new RuntimeException("Table not found: " + command.getTableName());
+            throw new DatabaseException("Table not found: " + command.getTableName());
         }
 
         List<String> tableColumns = table.getColumns();
@@ -95,7 +93,7 @@ public class QueryExecutor {
 
                 int index = tableColumns.indexOf(columnName);
                 if (index == -1) {
-                    throw new RuntimeException("Column not found: " + columnName);
+                    throw new DatabaseException("Column not found: " + columnName);
                 }
 
                 row[index] = value;
@@ -103,12 +101,16 @@ public class QueryExecutor {
         }
     }
 
-    public void executeDelete(DeleteCommand command) {
+    public void executeDelete(DeleteCommand command) throws DatabaseException {
         Table table = database.getTable(command.getTableName());
         if (table == null) {
-            throw new RuntimeException("Table not found: " + command.getTableName());
+            throw new DatabaseException("Table not found: " + command.getTableName());
         }
 
         table.getRows().clear();
+    }
+
+    public void executeCreate(CreateCommand command) {
+        // Execute create
     }
 }

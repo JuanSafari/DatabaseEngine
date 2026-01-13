@@ -2,6 +2,7 @@ package cli;
 
 import commands.SqlCommand;
 import engine.QueryExecutor;
+import exception.DatabaseException;
 import exception.MemoryException;
 import exception.SqlSyntaxException;
 import model.Database;
@@ -54,8 +55,8 @@ public class CommandLineInterface {
             command.execute(executor);
         } catch (SqlSyntaxException e) {
             System.out.println("Sql syntax error: " + e.getMessage());
-        } catch (RuntimeException e) {
-            System.out.println("Error: Incorrect command");
+        } catch (DatabaseException e) {
+            System.out.println("Database error: " + e.getMessage());
         }
     }
 }
