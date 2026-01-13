@@ -8,7 +8,7 @@ import java.util.Map;
 @Data
 public class UpdateCommand implements SqlCommand {
     private final String tableName;
-    private final Map<String, Object> newValues;
+    private final Map<String, String> newValues;
 
     public void execute(QueryExecutor executor) {
         executor.executeUpdate(this);

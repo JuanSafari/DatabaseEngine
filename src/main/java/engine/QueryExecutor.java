@@ -1,7 +1,9 @@
 package engine;
 
+import commands.DeleteCommand;
 import commands.InsertCommand;
 import commands.SelectCommand;
+import commands.UpdateCommand;
 import lombok.Data;
 import model.Database;
 import model.Table;
@@ -77,11 +79,36 @@ public class QueryExecutor {
         table.addRow(newRow);
     }
 
-    public void executeUpdate(Object command) {
-        System.out.println("Executing UPDATE command");
+    public void executeUpdate(UpdateCommand command) {
+        Table table = database.getTable(command.getTableName());
+        if (table == null) {
+            throw new RuntimeException("Table not found: " + command.getTableName());
+        }
+
+        List<String> tableColumns = table.getColumns();
+        List<String[]> tableRows = table.getRows();
+
+        for (String[] row : tableRows) {
+            for (Map.Entry<String, String> entry : command.getNewValues().entrySet()) {
+                String columnName = entry.getKey();
+                String value = entry.getValue();
+
+                int index = tableColumns.indexOf(columnName);
+                if (index == -1) {
+                    throw new RuntimeException("Column not found: " + columnName);
+                }
+
+                row[index] = value;
+            }
+        }
     }
 
-    public void executeDelete(Object command) {
-        System.out.println("Executing DELETE command");
+    public void executeDelete(DeleteCommand command) {
+        Table table = database.getTable(command.getTableName());
+        if (table == null) {
+            throw new RuntimeException("Table not found: " + command.getTableName());
+        }
+
+        table.getRows().clear();
     }
 }

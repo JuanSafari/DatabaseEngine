@@ -19,6 +19,10 @@ public class SqlParser {
             return parseSelect(queryTokens);
         } else if (queryTokens.get(0).equalsIgnoreCase("INSERT")) {
             return parseInsert(queryTokens);
+        } else if (queryTokens.get(0).equalsIgnoreCase("UPDATE")) {
+            return parseUpdate(queryTokens);
+        } else if (queryTokens.get(0).equalsIgnoreCase("DELETE")) {
+            return parseDelete(queryTokens);
         }
         return null;
     }
@@ -88,5 +92,51 @@ public class SqlParser {
         }
 
         return new InsertCommand(tableName, valuesMap);
+    }
+
+    private SqlCommand parseUpdate(List<String> queryTokens) {
+        queryTokens.remove(0);
+
+        String tableName = queryTokens.remove(0);
+
+        if (!queryTokens.get(0).equalsIgnoreCase("SET")) {
+            throw new RuntimeException("Expected SET");
+        }
+        queryTokens.remove(0);
+
+        Map<String, String> newValues = new HashMap<>();
+
+        while (!queryTokens.isEmpty()) {
+            String column = queryTokens.remove(0);
+
+            if (!queryTokens.get(0).equals("=")) {
+                throw new RuntimeException("Expected '=' after column name");
+            }
+            queryTokens.remove(0);
+
+            String value = queryTokens.remove(0);
+            newValues.put(column, value);
+
+            if (!queryTokens.isEmpty() && queryTokens.get(0).equals(",")) {
+                queryTokens.remove(0);
+            } else {
+                break;
+            }
+        }
+
+        return new commands.UpdateCommand(tableName, newValues);
+    }
+
+    private SqlCommand parseDelete(List<String> queryTokens) {
+        queryTokens.remove(0);
+
+        if (!queryTokens.get(0).equalsIgnoreCase("FROM")) {
+            throw new RuntimeException("Expected FROM");
+        }
+        queryTokens.remove(0);
+
+        String tableName = queryTokens.remove(0);
+
+        return new commands.DeleteCommand(tableName);
     }
 }
