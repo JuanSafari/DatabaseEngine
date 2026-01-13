@@ -2,6 +2,7 @@ package parser;
 
 import commands.InsertCommand;
 import commands.SqlCommand;
+import exception.SqlSyntaxException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ public class SqlParser {
     public SqlParser() {
     }
 
-    public SqlCommand getCommand(String query) {
+    public SqlCommand getCommand(String query) throws SqlSyntaxException {
         List<String> queryTokens = new ArrayList<>(tokenizer.tokenize(query));
         if (queryTokens.get(0).equalsIgnoreCase("SELECT")) {
             return parseSelect(queryTokens);
@@ -42,11 +43,11 @@ public class SqlParser {
         return new commands.SelectCommand(tableName, columns);
     }
 
-    private SqlCommand parseInsert(List<String> queryTokens) {
+    private SqlCommand parseInsert(List<String> queryTokens) throws SqlSyntaxException {
         queryTokens.remove(0);
 
         if (!queryTokens.get(0).equalsIgnoreCase("INTO")) {
-            throw new RuntimeException("Expected INTO");
+            throw new SqlSyntaxException("Expected INTO");
         }
         queryTokens.remove(0);
 
@@ -67,13 +68,13 @@ public class SqlParser {
         }
 
         if (!queryTokens.get(0).equalsIgnoreCase("VALUES")) {
-            throw new RuntimeException("Expected VALUES");
+            throw new SqlSyntaxException("Expected VALUES");
         }
         queryTokens.remove(0);
 
         List<String> values = new ArrayList<>();
         if (!queryTokens.get(0).equals("(")) {
-            throw new RuntimeException("Expected ( after VALUES");
+            throw new SqlSyntaxException("Expected ( after VALUES");
         }
         queryTokens.remove(0);
 
@@ -94,13 +95,13 @@ public class SqlParser {
         return new InsertCommand(tableName, valuesMap);
     }
 
-    private SqlCommand parseUpdate(List<String> queryTokens) {
+    private SqlCommand parseUpdate(List<String> queryTokens) throws SqlSyntaxException {
         queryTokens.remove(0);
 
         String tableName = queryTokens.remove(0);
 
         if (!queryTokens.get(0).equalsIgnoreCase("SET")) {
-            throw new RuntimeException("Expected SET");
+            throw new SqlSyntaxException("Expected SET");
         }
         queryTokens.remove(0);
 
@@ -110,7 +111,7 @@ public class SqlParser {
             String column = queryTokens.remove(0);
 
             if (!queryTokens.get(0).equals("=")) {
-                throw new RuntimeException("Expected '=' after column name");
+                throw new SqlSyntaxException("Expected = after column name");
             }
             queryTokens.remove(0);
 
@@ -127,11 +128,11 @@ public class SqlParser {
         return new commands.UpdateCommand(tableName, newValues);
     }
 
-    private SqlCommand parseDelete(List<String> queryTokens) {
+    private SqlCommand parseDelete(List<String> queryTokens) throws SqlSyntaxException {
         queryTokens.remove(0);
 
         if (!queryTokens.get(0).equalsIgnoreCase("FROM")) {
-            throw new RuntimeException("Expected FROM");
+            throw new SqlSyntaxException("Expected FROM");
         }
         queryTokens.remove(0);
 

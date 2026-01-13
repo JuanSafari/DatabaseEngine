@@ -2,6 +2,8 @@ package cli;
 
 import commands.SqlCommand;
 import engine.QueryExecutor;
+import exception.MemoryException;
+import exception.SqlSyntaxException;
 import model.Database;
 import parser.SqlParser;
 import storage.StorageManager;
@@ -22,14 +24,24 @@ public class CommandLineInterface {
     }
 
     private void run() {
-        db = storageManager.load("src/main/java/storage/default_db.json");
+        try {
+            db = storageManager.load("src/main/java/storage/default_db.json");
+        } catch (MemoryException e) {
+            System.out.println("Error loading database: " + e.getMessage());
+            System.out.println("Creating a new database.");
+            db = new Database();
+        }
         executor = new QueryExecutor(db);
 
         while (true) {
             System.out.print("db> ");
             String inputString = scanner.nextLine();
             if (inputString.equalsIgnoreCase("exit")) {
-                StorageManager.save(db, "src/main/java/storage/default_db.json");
+                try {
+                    StorageManager.save(db, "src/main/java/storage/default_db.json");
+                } catch (MemoryException e) {
+                    System.out.println("Error saving database: " + e.getMessage());
+                }
                 break;
             }
             processInput(inputString);
@@ -37,7 +49,13 @@ public class CommandLineInterface {
     }
 
     private void processInput(String input) {
-        SqlCommand command = parser.getCommand(input);
-        command.execute(executor);
+        try {
+            SqlCommand command = parser.getCommand(input);
+            command.execute(executor);
+        } catch (SqlSyntaxException e) {
+            System.out.println("Sql syntax error: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println("Error: Incorrect command");
+        }
     }
 }
