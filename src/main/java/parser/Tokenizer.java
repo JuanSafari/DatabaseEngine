@@ -7,6 +7,8 @@ public class Tokenizer {
     }
 
     public List<String> tokenize(String query) {
-        return List.of((query.split("[ ,]+")));
+        query = query.replaceAll("([(),])", " $1 ");
+        query = query.trim().replaceAll("\\s+", " ");
+        return List.of(query.split(" "));
     }
 }

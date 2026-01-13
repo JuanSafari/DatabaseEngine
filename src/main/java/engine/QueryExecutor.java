@@ -59,13 +59,8 @@ public class QueryExecutor {
         }
 
         List<String> tableColumns = table.getColumns();
-        List<String[]> tableRows = table.getRows();
 
         String[] newRow = new String[tableColumns.size()];
-
-        for (String i : newRow) {
-            i = null;
-        }
 
         for (Map.Entry<String, String> entry : command.getValues().entrySet()) {
             String columnName = entry.getKey();
@@ -77,9 +72,9 @@ public class QueryExecutor {
             }
 
             newRow[index] = value;
-
-            table.addRow(newRow);
         }
+
+        table.addRow(newRow);
     }
 
     public void executeUpdate(Object command) {
