@@ -25,7 +25,7 @@ public class Tokenizer {
                 continue;
             }
 
-            if (startsWithIgnoreCase(query, i)) {
+            if (startsWithValuesIgnoreCase(query, i)) {
                 tokens.add(query.substring(i, i + 6));
                 i += 6;
 
@@ -34,47 +34,39 @@ public class Tokenizer {
                     tokens.add("(");
                     i++;
 
-                    StringBuilder valueBuilder = new StringBuilder();
                     while (i < queryLength) {
                         while (i < queryLength && Character.isWhitespace(query.charAt(i))) i++;
-                        if (i < queryLength && query.charAt(i) == ')') {
-                            tokens.add(valueBuilder.toString());
-                            valueBuilder.setLength(0);
+                        if (i >= queryLength) break;
+
+                        char current = query.charAt(i);
+
+                        if (current == ')') {
                             tokens.add(")");
                             i++;
                             break;
                         }
-
-                        if (i < queryLength && query.charAt(i) == ',') {
-                            tokens.add(valueBuilder.toString());
-                            valueBuilder.setLength(0);
+                        if (current == ',') {
                             tokens.add(",");
                             i++;
                             continue;
                         }
 
-                        if (i < queryLength && (query.charAt(i) == '\'' || query.charAt(i) == '"')) {
-                            char quoteChar = query.charAt(i);
-                            int start = i + 1;
+                        if (current == '\'' || current == '"') {
+                            int start = ++i;
+                            while (i < queryLength && query.charAt(i) != current) i++;
+                            tokens.add(query.substring(start, i));
                             i++;
-                            while (i < queryLength && query.charAt(i) != quoteChar) i++;
-                            String val = query.substring(start, i);
-                            tokens.add(val);
-                            i++;
-
                             continue;
                         }
 
-                        while (i < queryLength && query.charAt(i) != ',' && query.charAt(i) != ')') {
-                            valueBuilder.append(query.charAt(i));
+                        int start = i;
+                        while (i < queryLength && query.charAt(i) != ',' && query.charAt(i) != ')' && !Character.isWhitespace(query.charAt(i))) {
                             i++;
                         }
-
-                        String val = valueBuilder.toString().trim();
+                        String val = query.substring(start, i).trim();
                         if (!val.isEmpty()) {
                             tokens.add(val);
                         }
-                        valueBuilder.setLength(0);
                     }
                     continue;
                 }
@@ -98,10 +90,15 @@ public class Tokenizer {
             }
             tokens.add(query.substring(start, i));
         }
+
+        for (String token : tokens) {
+            System.out.println(token);
+        }
+
         return tokens;
     }
 
-    private boolean startsWithIgnoreCase(String s, int offset) {
+    private boolean startsWithValuesIgnoreCase(String s, int offset) {
         int n = "values".length();
         if (offset + n > s.length()) return false;
         return s.regionMatches(true, offset, "values", 0, n);
