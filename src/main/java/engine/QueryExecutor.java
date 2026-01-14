@@ -7,7 +7,6 @@ import model.Database;
 import model.Table;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class QueryExecutor {
         List<String[]> tableRows = table.getRows();
 
         List<Integer> selectedIndexes = new ArrayList<>();
-        if (command.getColumns().get(0).equals("*")) {
+        if (command.getColumns().getFirst().equals("*")) {
             for (int i = 0; i < tableColumns.size(); i++) {
                 selectedIndexes.add(i);
             }
@@ -99,6 +98,20 @@ public class QueryExecutor {
         List<String[]> tableRows = table.getRows();
 
         for (String[] row : tableRows) {
+            if (command.getWhereClause() != null) {
+                int whereIndex = tableColumns.indexOf(
+                        command.getWhereClause().getWhereColumn()
+                );
+                if (whereIndex == -1) {
+                    throw new DatabaseException("Column not found: " + command.getWhereClause().getWhereColumn());
+                }
+
+                String whereValue = command.getWhereClause().getWhereValue();
+                if (!row[whereIndex].equals(whereValue)) {
+                    continue;
+                }
+            }
+
             for (Map.Entry<String, String> entry : command.getNewValues().entrySet()) {
                 String columnName = entry.getKey();
                 String value = entry.getValue();
@@ -119,7 +132,26 @@ public class QueryExecutor {
             throw new DatabaseException("Table not found: " + command.getTableName());
         }
 
-        table.getRows().clear();
+        List<String> tableColumns = table.getColumns();
+        List<String[]> tableRows = table.getRows();
+
+        if (command.getWhereClause() == null) {
+            tableRows.clear();
+            return;
+        }
+
+        int whereIndex = tableColumns.indexOf(
+                command.getWhereClause().getWhereColumn()
+        );
+        if (whereIndex == -1) {
+            throw new DatabaseException(
+                    "Column not found: " + command.getWhereClause().getWhereColumn()
+            );
+        }
+
+        String whereValue = command.getWhereClause().getWhereValue();
+
+        tableRows.removeIf(row -> row[whereIndex].equals(whereValue));
     }
 
     public void executeCreate(CreateCommand command) throws DatabaseException {

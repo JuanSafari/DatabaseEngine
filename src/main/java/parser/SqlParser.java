@@ -1,9 +1,6 @@
 package parser;
 
-import commands.InsertCommand;
-import commands.SelectCommand;
-import commands.SqlCommand;
-import commands.WhereClause;
+import commands.*;
 import exception.SqlSyntaxException;
 
 import java.util.ArrayList;
@@ -137,7 +134,12 @@ public class SqlParser {
             }
         }
 
-        return new commands.UpdateCommand(tableName, newValues);
+        if (!queryTokens.isEmpty() && queryTokens.getFirst().equalsIgnoreCase("WHERE")) {
+            WhereClause whereClause = parseWhereClause(queryTokens);
+            return new UpdateCommand(tableName, newValues, whereClause);
+        }
+
+        return new UpdateCommand(tableName, newValues);
     }
 
     private SqlCommand parseDelete(List<String> queryTokens) throws SqlSyntaxException {
@@ -150,7 +152,12 @@ public class SqlParser {
 
         String tableName = queryTokens.removeFirst();
 
-        return new commands.DeleteCommand(tableName);
+        if (!queryTokens.isEmpty() && queryTokens.getFirst().equalsIgnoreCase("WHERE")) {
+            WhereClause whereClause = parseWhereClause(queryTokens);
+            return new DeleteCommand(tableName, whereClause);
+        }
+
+        return new DeleteCommand(tableName);
     }
 
     private SqlCommand parseCreate(List<String> queryTokens) throws SqlSyntaxException {
