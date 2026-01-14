@@ -1,5 +1,6 @@
 package parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Tokenizer {
@@ -7,10 +8,10 @@ public class Tokenizer {
     }
 
     public List<String> tokenize(String query) {
-        List<String> tokens = new java.util.ArrayList<>();
+        List<String> tokens = new ArrayList<>();
         int i = 0;
-        int n = query.length();
-        while (i < n) {
+        int queryLength = query.length();
+        while (i < queryLength) {
             char c = query.charAt(i);
 
             if (Character.isWhitespace(c)) {
@@ -18,62 +19,53 @@ public class Tokenizer {
                 continue;
             }
 
-            if (c == '(' || c == ')' || c == ',' || c == ';') {
+            if (c == '(' || c == ')' || c == ',' || c == ';' || c == '=') {
                 tokens.add(String.valueOf(c));
                 i++;
                 continue;
             }
 
-            if (startsWithIgnoreCase(query, i, "values")) {
+            if (startsWithIgnoreCase(query, i)) {
                 tokens.add(query.substring(i, i + 6));
                 i += 6;
 
-                while (i < n && Character.isWhitespace(query.charAt(i))) i++;
-                if (i < n && query.charAt(i) == '(') {
+                while (i < queryLength && Character.isWhitespace(query.charAt(i))) i++;
+                if (i < queryLength && query.charAt(i) == '(') {
                     tokens.add("(");
                     i++;
 
                     StringBuilder valueBuilder = new StringBuilder();
-                    boolean insideValue = false;
-                    while (i < n) {
-                        while (i < n && Character.isWhitespace(query.charAt(i))) i++;
-                        if (i < n && query.charAt(i) == ')') {
-                            if (insideValue) {
-                                tokens.add(valueBuilder.toString());
-                                valueBuilder.setLength(0);
-                                insideValue = false;
-                            }
+                    while (i < queryLength) {
+                        while (i < queryLength && Character.isWhitespace(query.charAt(i))) i++;
+                        if (i < queryLength && query.charAt(i) == ')') {
+                            tokens.add(valueBuilder.toString());
+                            valueBuilder.setLength(0);
                             tokens.add(")");
                             i++;
                             break;
                         }
 
-                        if (i < n && query.charAt(i) == ',') {
-                            if (insideValue) {
-                                tokens.add(valueBuilder.toString());
-                                valueBuilder.setLength(0);
-                                insideValue = false;
-                            }
+                        if (i < queryLength && query.charAt(i) == ',') {
+                            tokens.add(valueBuilder.toString());
+                            valueBuilder.setLength(0);
                             tokens.add(",");
                             i++;
                             continue;
                         }
 
-                        if (i < n && (query.charAt(i) == '\'' || query.charAt(i) == '"')) {
+                        if (i < queryLength && (query.charAt(i) == '\'' || query.charAt(i) == '"')) {
                             char quoteChar = query.charAt(i);
                             int start = i + 1;
                             i++;
-                            while (i < n && query.charAt(i) != quoteChar) i++;
+                            while (i < queryLength && query.charAt(i) != quoteChar) i++;
                             String val = query.substring(start, i);
                             tokens.add(val);
                             i++;
 
-                            insideValue = false;
                             continue;
                         }
 
-                        int start = i;
-                        while (i < n && query.charAt(i) != ',' && query.charAt(i) != ')' ) {
+                        while (i < queryLength && query.charAt(i) != ',' && query.charAt(i) != ')') {
                             valueBuilder.append(query.charAt(i));
                             i++;
                         }
@@ -83,7 +75,6 @@ public class Tokenizer {
                             tokens.add(val);
                         }
                         valueBuilder.setLength(0);
-                        insideValue = false;
                     }
                     continue;
                 }
@@ -91,17 +82,16 @@ public class Tokenizer {
             }
 
             if (c == '\'' || c == '"') {
-                char quoteChar = c;
                 int start = i + 1;
                 i++;
-                while (i < n && query.charAt(i) != quoteChar) i++;
+                while (i < queryLength && query.charAt(i) != c) i++;
                 tokens.add(query.substring(start, i));
                 i++;
                 continue;
             }
 
             int start = i;
-            while (i < n && !Character.isWhitespace(query.charAt(i)) &&
+            while (i < queryLength && !Character.isWhitespace(query.charAt(i)) &&
                     query.charAt(i) != '(' && query.charAt(i) != ')' &&
                     query.charAt(i) != ',' && query.charAt(i) != ';') {
                 i++;
@@ -111,9 +101,9 @@ public class Tokenizer {
         return tokens;
     }
 
-    private boolean startsWithIgnoreCase(String s, int offset, String prefix) {
-        int n = prefix.length();
+    private boolean startsWithIgnoreCase(String s, int offset) {
+        int n = "values".length();
         if (offset + n > s.length()) return false;
-        return s.regionMatches(true, offset, prefix, 0, n);
+        return s.regionMatches(true, offset, "values", 0, n);
     }
 }
