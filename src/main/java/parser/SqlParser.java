@@ -97,8 +97,12 @@ public class SqlParser {
         queryTokens.removeFirst();
 
         Map<String, String> valuesMap = new HashMap<>();
-        for (String value : values) {
-            valuesMap.put(columns.get(values.indexOf(value)), value);
+        if (columns.size() != values.size()) {
+            throw new SqlSyntaxException("Number of columns and values do not match");
+        }
+
+        for (int i = 0; i < values.size(); i++) {
+            valuesMap.put(columns.get(i), values.get(i));
         }
 
         return new InsertCommand(tableName, valuesMap);
